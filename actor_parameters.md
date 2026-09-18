@@ -552,7 +552,7 @@ The following parameters are listed separately as I have no real understanding o
 ### Names
 
 - Proc Name: PROC_L1MBOSS_DOOR
-- File Name: d_a_door_shutter.cpp
+- File Name: d_a_door_mbossL1.cpp
 - Object Names:
   - "L1Mdoor" -> argument: 0x01
   - "L2Mdoor" -> argument: 0x02
@@ -569,7 +569,7 @@ Make sure not to mix up the object names of the doors in City in the Sky. The ob
 
 ### Description
 
-While being called Midboss Door, this actor is not exclusively used as a door to and from midboss rooms. Instead, it is used as a door between any rooms with a loading transition.
+While being called Midboss Door, this actor is not exclusively used as a door to and from midboss rooms. It is also used as a door between any two rooms with a loading transition. Examples: Snowpeak Ruins, City in the Sky and Palace of Twilight.
 
 ### Parameters
 
