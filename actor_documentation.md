@@ -1,3 +1,59 @@
+# Item Actors
+
+## Treasure Chest
+
+### Names
+
+- Proc Name: PROC_TBOX
+- File Name: d_a_tbox.cpp
+- Object Names:
+  - "tboxA0" -> argument: -1
+  - "tboxA1" -> argument: -1
+  - "tboxA2" -> argument: -1
+  - "tboxB0" -> argument: -1
+  - "tboxB1" -> argument: -1
+  - "tboxB2" -> argument: -1
+  - "tboxJ0" -> argument: -1
+  - "tboxP0" -> argument: -1
+  - "tboxB00" -> argument: -1
+  - "tboxB01" -> argument: -1
+  - "tboxW0" -> argument: -1
+  - "tboxEL0" -> argument: -1
+  - "tboxEL1" -> argument: -1
+
+### Description
+
+Actor used for all treasure chests that can be opened to receive an item.
+
+
+### Parameters
+
+| Variable | Bit mask | Bit shift | Bit length | Name | Description|
+|---|---|---|---|---|---|
+|Parameter|0xFF000000|24|8|Drop Event Number|Event that is to be played upon the treasure chest spawning or being dropped. If set to 0xFF, the default event is played when the chest spawns.|
+|Parameter|0x00F00000|20|4|Chest Shape|Defines the shape of the treasure chest. If set to 0, it's a small wooden chest. If set to 1, it's a regular chest. If set to 2, it's a boss key chest.|
+|Parameter|0x000FF000|12|8|Spawn Switch|Switch flag that causes this chest to be spawned.|
+|Parameter|0x00000FC0|6|6|Treasure Switch|Treasure switch that is set to true upon this chest being opened. If the switch is already set to true upon this chest being spawned, it will already be in the opened state.|
+|Parameter|0x0000003F|0|6|Function Type|Determines whether this chest has any special behavior. See Function Types below.|
+|Angle X|0x000F|0|8|Switch Type|Determines behavior related to the observing of switch flags. See Switch Types below.|
+|Angle Z|0xFF00|8|8|Item Number|Number of the item that the player recieves upon opening this chest.|
+|Angle Z|0x00FF|0|8|Path Id|TBD|
+
+
+### Function Types
+
+- 0x00: The chest does not have any special behavior.
+- 0x01: The chest does not appear until the observed spawn switch flag is set to true.
+- 0x02: The chest does not appear until all enemies in the room have been defeated.
+- 0x05: TBD
+- 0x06: Determines behavior related to the chest on the pillar in the Tile Worm room of the Forest Temple.
+- 0x07: TBD
+
+### Switch Types
+
+- 0x00: The treasure chest does not only observe the spawn switch at 0x000FF000 of the parameter but also the 3 following switch flags. This is used for the treasure chest on the pillar in the Tile Worm room of the Forest Temple, as that chest can be dropped into sixteen directions.
+- 0x0F: If the function type is set to 0x01, the treasure chest will spawn upon the observed switch being set to true.
+
 
 # Enemy Actors
 
