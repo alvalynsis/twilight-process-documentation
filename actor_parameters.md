@@ -3,8 +3,8 @@
 ## Area vs Stage vs Room/Zone
 
 - The term area is used to denote the collection of all stages that share the same set of area switch flags. For example, the Forest Temple dungeon stage (D_MN05), midboss room stage (D_MN05B) and boss room stage (D_MN05A) all share the same area switch flags.
-- The term stage is used to denote the collection of rooms that all belong to one stage.
-- A room is simply one room within said stage. In the decomp, this is alternatively also referred to as a zone at times.
+- A stage in this game can house one or multiple rooms, of which not all have to be loaded into memory at the same time. It can also define properties shared across all rooms. A stage can load actors that are always potentially spawned, regardless of the room the player is in. For example, many doors in each dungeon are typically spawned in at all times, even while in neither of the rooms connected by said doors.
+- A room is simply one room within said stage. In the decomp, this is alternatively also referred to as a zone at times. This document will always use the term room, even if the various zones within Hyrule Field, for example, don't look like "rooms".
 
 
 ## Flags
@@ -17,6 +17,8 @@
 - 0xE0 to 0xEF: Temporarily saved room-specific switch flags that immediately get reset upon entering the room or respawning in the same room.
 
 ### Treasure Box Flag
+
+Treasure Box Flags are mostly dedicated to determining whether a treasure chest has been opened or not. There are a few other actors that also make use of them, such as small keys that are not obtained via treasure chests, tears of light obtained in the Twilight or actors that can have a special map marker attached to them such as the monkeys in Forest Temple, Ooccoo, Telma's carriage during the escort mission, the big statue in Temple of Time or the sols in Palace of Twilight.
 
 ### Item Flag
 
@@ -37,10 +39,10 @@ This refers to the name of the file in which the actor's code is written.
 
 ### Object Name
 
-This refers to the name by which the actor-related chunks in the dzs or dzr files - such as ACTR, SCOB, TRES or Door - refer to the actor that is intended to be spawned.
-Note that any actor may have multiple object names, possibly to aid in visibly denoting different sub types of these actors. However, this does not always mean that the different name will actually change the actor itself. While there are many object names for treasure chests, they themselves do not affect the treasure chest that is spawned.
+This refers to the name by which the actor-related chunks in the dzs or dzr files - such as ACTR, SCOB, TRES or Door - refer to the actor that is intended to be spawned. Every object name then refers to a proc name and an additional argument (signed 8 bit integer).
+Note that any actor may have multiple object names, possibly to aid in more clearly denoting different sub types of these actors. However, this does not always mean that the different name will actually change the actor itself. While there are many object names for treasure chests, they themselves do not affect the treasure chest that is spawned.
 There are only some examples where the name used also affects an argument variable that is then handled by the actor itself. One such example is the Helmasaur and the Helmasaurus. If spawned via the object name "E_mm", the argument -1 is given to the actor, causing it to be a basic Helmasaur as seen in Lakebed Temple. If spawned via the object name "E_mm2", the argument 0x01 is given to the actor instead, causing it to be a great Helmasaurus as seen in City in the Sky.
-There are also actors that do not have an object name, as they are never spawned via the actor-related chunks in the dzs or dzr files. On such example are the Toados spawned by the Deku Toad miniboss. Here, Deku Toad simply spawns them via their proc name id instead.
+There are also actors that do not have an object name, as they are never spawned via the actor-related chunks in the dzs or dzr files. One such example are the Toados spawned by the Deku Toad miniboss. Here, Deku Toad simply spawns them via their proc name id instead.
 
 
 # Item Actors
@@ -96,7 +98,7 @@ Actor used for all treasure chests that can be opened to receive an item.
 
 ### Switch Types
 
-- 0x00: The treasure chest does not only observe the spawn switch at 0x000FF000 of the parameter but also the 3 following switch flags. This is used for the treasure chest on the pillar in the Tile Worm room of the Forest Temple, as that chest can be dropped into sixteen directions.
+- 0x00: The treasure chest does not only observe the spawn switch at 0x000FF000 of the parameter but also the 3 following switch flags. This is used for the treasure chest on the pillar in the Tile Worm room of the Forest Temple, as that chest can be dropped into sixteen different directions based on the direction from which the player rolls against the pillar.
 - 0x0F: If the function type is set to 0x01, the treasure chest will spawn upon the observed switch being set to true.
 
 
@@ -106,14 +108,14 @@ Actor used for all treasure chests that can be opened to receive an item.
 
 ### Names
 
-- Proc Name: PROC_E_EB
+- Proc Name: PROC_E_HB
 - File Name: d_a_e_hb.cpp
 - Object Names:
   - "E_hb" -> argument: -1
 
 ### Description
 
-Basic Deku Baba enemy. Does not include the more aggressive Baba Serpent variation.
+Basic Deku Baba enemy. Does not include the more aggressive Baba Serpent variant.
 
 ### Parameters
 
@@ -124,7 +126,34 @@ Basic Deku Baba enemy. Does not include the more aggressive Baba Serpent variati
 |Parameter|0x0000FF00|8|8|Player Search Range|Defines the search range for the player. The resulting range is X*100. If this parameter is set to either 0x00 or 0xFF, the search range is 500.|
 |Parameter|0x000000C0|6|2|Stay Awake|If set to 1, the Deku Baba is permanently awake.|
 |Parameter|0x00000030|4|2|Higher Attack Frequency|If set to 1, the attack cooldown is slightly lowered from a range of [30, 60] to [30, 50] frames.|
-|Parameter|0x0000000F|0|4|Upside Down|Defines whether the Deku Baba is rotated so that it looks like it's hanging from the ceiling, or not. If set to either 0x0 or 0xF, it is rightside up. If set to 0x2, it is upside down.|
+|Parameter|0x0000000F|0|4|Upside Down|Defines whether the Deku Baba is rotated so that it looks like it's hanging from the ceiling, or not. If set to 0x2, it is upside down.|
+
+
+## Shadow Deku Baba
+
+### Names
+
+- Proc Name: PROC_E_YD
+- File Name: d_a_e_yd.cpp
+- Object Names:
+  - "E_yd" -> argument: -1
+
+### Description
+
+Twilight realm variant of the Deku Baba.
+
+
+### Parameters
+
+| Variable | Bit mask | Bit shift | Bit length | Name | Description|
+|---|---|---|---|---|---|
+|Parameter|0xFF000000|24|8|~~Defeat Flag~~|Likely intended to be this actor's defeat flag. However, neither the switch flag check nor the setting of the switch flag are implemented.|
+|Parameter|0x0000FF00|8|8|Player Search Range|Defines the search range for the player. The resulting range is X*100. If this parameter is set to either 0x00 or 0xFF, the search range is 500.|
+|Parameter|0x000000C0|6|2|Stay Awake|If set to 1, the Shadow Deku Baba is permanently awake.|
+|Parameter|0x00000030|4|2|Higher Attack Frequency|If set to 1, the attack cooldown is slightly lowered from a range of [30, 60] to [30, 50] frames.|
+|Parameter|0x0000000F|0|4|Upside Down|Defines whether the Shadow Deku Baba is rotated so that it looks like it's hanging from the ceiling, or not. If set to 0x2, it is upside down.|
+
+
 
 ## Baba Serpent
 
@@ -146,15 +175,35 @@ More aggressive and red-colored variant of the Deku Baba.
 |---|---|---|---|---|---|
 |Parameter|0xFF000000|24|8|Defeat Flag|Is set to true upon defeat. Prevents creation of this actor if set to true. If this parameter is set to 0xFF, there is no defeat flag.|
 |Parameter|0x00F00000|20|4|Stay Awake|If set to 1, the Deku Serpent is permanently awake.|
-|Parameter|0x000F0000|16|4|Higher Attack Frequency|If set to 1, the attack cooldown is slightly lowered from a range of [30, 60] to [30, 50] frames.
-|Parameter|0x0000FF00|8|8|Player Search Range|Defines the search range for the player. The resulting range is X*100. If this parameter is set to either 0x00 or 0xFF, the search range is 500.
-|Parameter|0x000000FF|0|8|Upside Down|Defines whether the Baba Serpent is rotated so that it can also look like it's hanging from the ceiling, or not. If set to 0, it is not rotated. If set to 1, it is rotated but has extra behavior specific to the Ook boss fight. If set to 2, it is only rotated but behaves like a normal enemy otherwise.|
+|Parameter|0x000F0000|16|4|Higher Attack Frequency|If set to 1, the attack cooldown is slightly lowered from a range of [30, 60] to [30, 50] frames.|
+|Parameter|0x0000FF00|8|8|Player Search Range|Defines the search range for the player. The resulting range is X*100. If this parameter is set to either 0x00 or 0xFF, the search range is 500.|
+|Parameter|0x000000FF|0|8|Upside Down|Defines whether the Baba Serpent is rotated so that it can also look like it's hanging from the ceiling, or not. If set to 0, it is not rotated. If set to 1, it is rotated but has extra behavior specific to the Ook boss fight. If set to 2, it is only rotated and behaves like a normal enemy otherwise.|
 
 
-## Shadow Deku Baba
 
-TBD
 
+## Shadow Baba Serpent
+
+### Names
+
+- Proc Name: PROC_E_YH
+- File Name: d_a_e_yh.cpp
+- Object Names:
+  - "E_yh" -> argument: -1
+
+### Description
+
+Twilight realm version of Baba Serpents. Funnily enough, these can exclusively be found in the first room in the left tower of Palace of Twilight. However, as they share the exact same model as the Shadow Deku Baba, they're typically not known to be their own enemy type.
+
+### Parameters
+
+| Variable | Bit mask | Bit shift | Bit length | Name | Description|
+|---|---|---|---|---|---|
+|Parameter|0xFF000000|24|8|Deactivation Flag (de facto)|While clearly intended to be a defeat flag, this actor only prevents being created if the observed switch flag is set. However, it does not set the flag to true by itself upon defeat. If set to 0xFF, there is no deactivation flag, which is the case for all Shadow Baba Serpents found in the game anyway.|
+|Parameter|0x00F00000|20|4|Stay Awake|If set to 1, the Shadow Baba Serpent is permanently awake.|
+|Parameter|0x000F0000|16|4|Higher Attack Frequency|If set to 1, the attack cooldown is slightly lowered from a range of [30, 60] to [30, 50] frames.|
+|Parameter|0x0000FF00|8|8|Player Search Range|Defines the search range for the player. The resulting range is X*100. If this parameter is set to either 0x00 or 0xFF, the search range is 500.|
+|Parameter|0x000000FF|0|8|Upside Down|Defines whether the Shadow Baba Serpent is rotated so that it looks like it's hanging from the ceiling, or not. If set to 0x1 or 0x2, it is upside down. There's no instance of a Shadow Baba Serpent existing in the game where this is set to something other than 0. There's also some extra code dedicated to this value being 0x1, possibly a holdover from the Baba Serpents? (TBD)|
 
 ## Keese
 
@@ -285,7 +334,25 @@ TBD
 
 ## Helmasaur / Helmasaurus
 
-TBD
+### Names
+
+- Proc Name: PROC_E_MM
+- File Name: d_a_e_mm.cpp
+- Object Names:
+  - "E_mm" -> argument: -1 (for basic Helmasaur)
+  - "E_mm2" -> argument: 0x01 (for bigger Helmasaurus)
+
+### Description
+
+Actor both for a basic Helmasaur as found in Lakebed Temple and also for the greater Helmasaurus as found in City in the Sky.
+
+### Parameters
+
+| Variable | Bit mask | Bit shift | Bit length | Name | Description|
+|---|---|---|---|---|---|
+|Argument|0xFF|0|0|Helmasaur Type|If set to 0x01, this actor is a Helmasaurus instead of a Helmasaur.|
+|Parameter|0x0000FF00|8|8|Defeat Flag|Is set to true upon defeat. Prevents creation of this actor if set to true. If this parameter is set to 0xFF, there is no defeat flag.|
+|Parameter|0x000000FF|8|8|Player Search Range|Defines the search range for the player. The resulting range is X*10. If this parameter is set to either 0x00 or 0xFF, the search range is 1000 by default.|
 
 ## Lizalfos
 
@@ -422,8 +489,6 @@ TBD
 - File Name: d_a_door_shutter.cpp
 - Object Names:
   - "door" -> argument: -1
-  - "kdoor" -> argument: -1
-  - "ddoor" -> argument: -1
   - "ndoor" -> argument: -1
   - "tadoor" -> argument: -1
   - "yodoor" -> argument: -1
@@ -431,6 +496,8 @@ TBD
   - "l9door" -> argument: -1
   - "l7door" -> argument: -1
   - "bigdoor" -> argument: -1
+
+Make sure not to mix up the object names of the doors in City in the Sky. The object name of the doors without loading transitions starts with a lower-case l ("l7door"), while the object name of the doors with loading transitions starts with an upper-case L ("L7door").
 
 ### Description
 
@@ -480,6 +547,34 @@ The following parameters are listed separately as I have no real understanding o
 - 0x0A: Shutter door that Link manually opens upwards. Used in Hyrule Castle.
 - 0x0C: Shutter door that opens by itself. Used in City in the Sky.
 
+## Midboss Door
+
+### Names
+
+- Proc Name: PROC_L1MBOSS_DOOR
+- File Name: d_a_door_shutter.cpp
+- Object Names:
+  - "L1Mdoor" -> argument: 0x01
+  - "L2Mdoor" -> argument: 0x02
+  - "L3Mdoor" -> argument: 0x03
+  - "L4Mdoor" -> argument: 0x04
+  - "L5Mdoor" -> argument: 0x05
+  - "L6Mdoor" -> argument: 0x06
+  - "L7Mdoor" -> argument: 0x07
+  - "L8Mdoor" -> argument: 0x08
+  - "L7door" -> argument: 0x0A
+  - "L5door" -> argument: 0x0B
+
+Make sure not to mix up the object names of the doors in City in the Sky. The object name of the doors without loading transitions starts with a lower-case l ("l7door"), while the object name of the doors with loading transitions starts with an upper-case L ("L7door").
+
+### Description
+
+While being called Midboss Door, this actor is not exclusively used as a door to and from midboss rooms. Instead, it is used as a door between any rooms with a loading transition.
+
+### Parameters
+
+TBD
+
 ## Door Stopper 2
 
 ### Names
@@ -501,8 +596,13 @@ Alternatively to defining the door bars in the parameters of a door itself, this
 |Parameter|0x000000FF|0|8|Switch Flag|Switch flag that determines whether the door is to be barred or not.|
 
 
+# Switch Object Actors
 
-# Switch Flag Logic Actors
+TBD
+
+
+
+# Switch Logic Actors
 
 ## And Switch 2
 
