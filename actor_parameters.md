@@ -1,3 +1,48 @@
+# Glossary
+
+## Area vs Stage vs Room/Zone
+
+- The term area is used to denote the collection of all stages that share the same set of area switch flags. For example, the Forest Temple dungeon stage (D_MN05), midboss room stage (D_MN05B) and boss room stage (D_MN05A) all share the same area switch flags.
+- The term stage is used to denote the collection of rooms that all belong to one stage.
+- A room is simply one room within said stage. In the decomp, this is alternatively also referred to as a zone at times.
+
+
+## Flags
+
+### Switch Flag
+
+- 0x00 to 0x7F: Permanently saved area switch flags.
+- 0x80 to 0xBF: Temporarily saved area switch flags that are reset upon entering a new area.
+- 0xC0 to 0xDF: Temporarily saved room-specific switch flags. Even while remaining in the same area, these may be reset at some point. The exact conditions for this are currently unknown to me.
+- 0xE0 to 0xEF: Temporarily saved room-specific switch flags that immediately get reset upon entering the room or respawning in the same room.
+
+### Treasure Box Flag
+
+### Item Flag
+
+- 0x00 to 0x7F: TBD
+- 0x80 to 0x9F: Permanently saved item flags for each area. Always used for pieces of heart and for rupees that can only be collected once.
+- 0xA0 to 0xBF: TBD
+- 0xC0 to 0xCF: TBD
+
+## Names
+
+### Proc Name
+
+This refers to the name of the actor's proc name by which it is spawned. The names of said enum are taken from d_procname.h in the decomp.
+
+### File Name
+
+This refers to the name of the file in which the actor's code is written.
+
+### Object Name
+
+This refers to the name by which the actor-related chunks in the dzs or dzr files - such as ACTR, SCOB, TRES or Door - refer to the actor that is intended to be spawned.
+Note that any actor may have multiple object names, possibly to aid in visibly denoting different sub types of these actors. However, this does not always mean that the different name will actually change the actor itself. While there are many object names for treasure chests, they themselves do not affect the treasure chest that is spawned.
+There are only some examples where the name used also affects an argument variable that is then handled by the actor itself. One such example is the Helmasaur and the Helmasaurus. If spawned via the object name "E_mm", the argument -1 is given to the actor, causing it to be a basic Helmasaur as seen in Lakebed Temple. If spawned via the object name "E_mm2", the argument 0x01 is given to the actor instead, causing it to be a great Helmasaurus as seen in City in the Sky.
+There are also actors that do not have an object name, as they are never spawned via the actor-related chunks in the dzs or dzr files. On such example are the Toados spawned by the Deku Toad miniboss. Here, Deku Toad simply spawns them via their proc name id instead.
+
+
 # Item Actors
 
 ## Treasure Chest
@@ -28,7 +73,7 @@ Actor used for all treasure chests that can be opened to receive an item.
 
 ### Parameters
 
-| Variable | Bit mask | Bit shift | Bit length | Name | Description|
+| Variable | Bit mask | Bit shift | Bit length | Name | Description |
 |---|---|---|---|---|---|
 |Parameter|0xFF000000|24|8|Drop Event Number|Event that is to be played upon the treasure chest spawning or being dropped. If set to 0xFF, the default event is played when the chest spawns.|
 |Parameter|0x00F00000|20|4|Chest Shape|Defines the shape of the treasure chest. If set to 0, it's a small wooden chest. If set to 1, it's a regular chest. If set to 2, it's a boss key chest.|
@@ -59,8 +104,27 @@ Actor used for all treasure chests that can be opened to receive an item.
 
 ## Deku Baba
 
-TBD
+### Names
 
+- Proc Name: PROC_E_EB
+- File Name: d_a_e_hb.cpp
+- Object Names:
+  - "E_hb" -> argument: -1
+
+### Description
+
+Basic Deku Baba enemy. Does not include the more aggressive Baba Serpent variation.
+
+### Parameters
+
+| Variable | Bit mask | Bit shift | Bit length | Name | Description |
+|---|---|---|---|---|---|
+|Parameter|0xFF000000|24|8|Defeat Flag|Is set to true upon defeat. Prevents creation of this actor if set to true. If this parameter is set to 0xFF, there is no defeat flag.|
+|Parameter|0x00FF0000|16|8|Item Drop|Determines the item that is dropped upon destroying the Deku seed left behind by the Deku Baba. If set to 0xFF, there is no item drop.|
+|Parameter|0x0000FF00|8|8|Player Search Range|Defines the search range for the player. The resulting range is X*100. If this parameter is set to either 0x00 or 0xFF, the search range is 500.|
+|Parameter|0x000000C0|6|2|Stay Awake|If set to 1, the Deku Baba is permanently awake.|
+|Parameter|0x00000030|4|2|Higher Attack Frequency|If set to 1, the attack cooldown is slightly lowered from a range of [30, 60] to [30, 50] frames.|
+|Parameter|0x0000000F|0|4|Upside Down|Defines whether the Deku Baba is rotated so that it looks like it's hanging from the ceiling, or not. If set to either 0x0 or 0xF, it is rightside up. If set to 0x2, it is upside down.|
 
 ## Baba Serpent
 
@@ -84,7 +148,7 @@ More aggressive and red-colored variant of the Deku Baba.
 |Parameter|0x00F00000|20|4|Stay Awake|If set to 1, the Deku Serpent is permanently awake.|
 |Parameter|0x000F0000|16|4|Higher Attack Frequency|If set to 1, the attack cooldown is slightly lowered from a range of [30, 60] to [30, 50] frames.
 |Parameter|0x0000FF00|8|8|Player Search Range|Defines the search range for the player. The resulting range is X*100. If this parameter is set to either 0x00 or 0xFF, the search range is 500.
-|Parameter|0x000000FF|0|8|Hanging From the Ceiling|Defines whether the Baba Serpent is rotated so that it can also look like it's hanging from the ceiling, or not. If set to 0, it is not rotated. If set to 1, it is rotated but has extra behavior specific to the Ook boss fight. If set to 2, it is only rotated but behaves like a normal enemy otherwise.|
+|Parameter|0x000000FF|0|8|Upside Down|Defines whether the Baba Serpent is rotated so that it can also look like it's hanging from the ceiling, or not. If set to 0, it is not rotated. If set to 1, it is rotated but has extra behavior specific to the Ook boss fight. If set to 2, it is only rotated but behaves like a normal enemy otherwise.|
 
 
 ## Shadow Deku Baba
@@ -207,11 +271,15 @@ TBD
 
 TBD
 
+## Beamos
+
+TBD
+
 ## Toadpoli
 
 TBD
 
-## Beamos
+## Toado
 
 TBD
 
@@ -379,7 +447,7 @@ This door actor connects rooms within an area that do not require a loading tran
 |Parameter|0x0007E000|13|6|Front Room No|Defines the room at the frontside of the door.|
 |Parameter|0x00001C00|10|3|Back Option|Defines whether the door is potentially locked or barred from the backside. See Front/Back Options below.|
 |Parameter|0x00000300|8|2|Front Option|Defines whether the door is potentially locked or barred from the frontside. See Front/Back Options below.|
-|Parameter|0x000000E0|5|3|Door Model|Defines the door model used. Please note that this does not allow for any door model in the game to be used anywhere, as the game loads the door model based on the area the player is in. This parameter only allows for the model to be changed if the area provides multiple door models. As such, this parameter is set to 0 for most doors. One example of this parameter not being 0 is the door in the Courtyard of Snowpeak Ruins that leads to the cannon balls in the west section, as it is possible to see through that door. Shutter doors and knobbed doors have different model pools.|
+|Parameter|0x000000E0|5|3|Door Model|Defines the door model used. Please note that this does not allow for any door model in the game to be used anywhere, as the game loads the door model based on the area the player is in. This parameter only allows for the model to be changed if the area provides multiple door models. As such, this parameter is set to 0 for most doors. One example of this parameter not being 0 is the door in the Courtyard of Snowpeak Ruins that leads to the cannon balls in the west section, as it is possible to see through that door. Shutter doors and knob doors have different model pools.|
 |Parameter|0x0000001F|0|5|Door Type|Defines the opening animation for the door.|
 |Angle X|0xFF00|8|8|Debris Switch Flag|Defines the switch flag that indicates whether the door has already been opened before. Opening the door for the first time causes debris to fall if it has not been opened yet. If set to 0xFF, there's never any debris from the door.|
 |Angle Z|0xFF00|8|8|Back Room Switch Flag|Defines the switch flag that indicates whether the door is unlocked or unbarred on the backside.|
@@ -408,7 +476,7 @@ The following parameters are listed separately as I have no real understanding o
 - 0x00: Shutter door that Link manually opens upwards.
 - 0x01: Shutter door that Link manually opens sideways.
 - 0x02: Shutter door from Palace of Twilight.
-- 0x09: Knobbed door.
+- 0x09: Knob door.
 - 0x0A: Shutter door that Link manually opens upwards. Used in Hyrule Castle.
 - 0x0C: Shutter door that opens by itself. Used in City in the Sky.
 
