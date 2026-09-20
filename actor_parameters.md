@@ -193,7 +193,7 @@ More aggressive and red-colored variant of the Deku Baba.
 
 ### Description
 
-Twilight realm version of Baba Serpents. Funnily enough, these can exclusively be found in the first room in the left tower of Palace of Twilight. However, as they share the exact same model as the Shadow Deku Baba, they're typically not known to be their own enemy type.
+Twilight realm version of Baba Serpents. Funnily enough, these can exclusively be found in the first room in the left tower of Palace of Twilight or when spawned by Phantom Zant. However, as they share the exact same model as the Shadow Deku Baba, they're typically not known to be their own enemy type.
 
 ### Parameters
 
@@ -508,10 +508,10 @@ This door actor connects rooms within an area that do not require a loading tran
 | Variable | Bit mask | Bit shift | Bit length | Name | Description|
 |---|---|---|---|---|---|
 |Parameter|0x80000000|31|1|Is Message Door|Defines whether there's a potential dialogue event tied to opening the door.|
-|Parameter|0x70000000|28|3|Back Light Influence|Defines the light's influence on the door while in the back room.|
+|Parameter|0x70000000|28|3|Back Light Influence|Defines the light's influence on the door while not in the front room.|
 |Parameter|0x0E000000|25|3|Front Light Influence|Defines the light's influence on the door while in the front room.|
-|Parameter|0x01F80000|19|6|Back Room No|Defines the room at the backside of the door.|
-|Parameter|0x0007E000|13|6|Front Room No|Defines the room at the frontside of the door.|
+|Parameter|0x01F80000|19|6|Back Room Number|Defines the room at the backside of the door.|
+|Parameter|0x0007E000|13|6|Front Room Number|Defines the room at the frontside of the door.|
 |Parameter|0x00001C00|10|3|Back Option|Defines whether the door is potentially locked or barred from the backside. See Front/Back Options below.|
 |Parameter|0x00000300|8|2|Front Option|Defines whether the door is potentially locked or barred from the frontside. See Front/Back Options below.|
 |Parameter|0x000000E0|5|3|Door Model|Defines the door model used. Please note that this does not allow for any door model in the game to be used anywhere, as the game loads the door model based on the area the player is in. This parameter only allows for the model to be changed if the area provides multiple door models. As such, this parameter is set to 0 for most doors. One example of this parameter not being 0 is the door in the Courtyard of Snowpeak Ruins that leads to the cannon balls in the west section, as it is possible to see through that door. Shutter doors and knob doors have different model pools.|
@@ -569,11 +569,100 @@ Make sure not to mix up the object names of the doors in City in the Sky. The ob
 
 ### Description
 
-While being called Midboss Door, this actor is not exclusively used as a door to and from midboss rooms. It is also used as a door between any two rooms with a loading transition. Examples: Snowpeak Ruins, City in the Sky and Palace of Twilight.
+While being called Midboss Door, this actor is not exclusively used as a door to and from midboss rooms. It is also used as a door between many two rooms with a loading transition. Examples: Snowpeak Ruins, City in the Sky and Palace of Twilight.
 
 ### Parameters
 
-TBD
+| Variable | Bit mask | Bit shift | Bit length | Name | Description |
+|---|---|---|---|---|---|
+|Argument|0xFF|8|8|Level Number|Indicates which dungeon the door belongs to, in order to allow for dungeon-specific door behavior.|
+|Parameter|0x7E000000|25|6|Exit Number|Defines the scene that is being loaded upon passing through the door.|
+|Parameter|0x01C00000|22|3|Back Light Influence|Defines the light's influence on the door while not in the front room.|
+|Parameter|0x00380000|19|3|Front Light Influence|Defines the light's influence on the door while in the front room.|
+|Parameter|0x0007E000|13|6|Front Room Number|Defines the room at the frontside of the door.|
+|Parameter|0x00001C00|10|3|Back Option|Defines whether the door is potentially barred from the backside. Note that the backside can not be locked. See Front/Back Options below.|
+|Parameter|0x00000300|8|2|Front Option|Defines whether the door is potentially locked or barred from the frontside. See Front/Back Options below.|
+|Angle X|0xFF00|8|8|Debris Switch Flag|Defines the switch flag that indicates whether the door has already been opened before. Opening the door for the first time causes debris to fall if it has not been opened yet. If set to 0xFF, there's never any debris from the door.|
+|Angle Z|0xFF00|8|8|Back Room Switch Flag|Defines the switch flag that indicates whether the door is unbarred on the backside.|
+|Angle Z|0x00FF|0|8|Front Room Switch Flag|Defines the switch flag that indicates whether the door is unlocked or unbarred on the frontside.|
+
+## Default Boss Door
+
+### Names
+
+- Proc Name: PROC_L1BOSS_DOOR
+- File Name: d_a_door_bossL1.cpp
+- Object Names:
+  - "L1Bdoor" -> argument: -1
+  - "L2Bdoor" -> argument: -1
+  - "L4Bdoor" -> argument: -1
+  - "L6Bdoor" -> argument: -1
+  - "L7Bdoor" -> argument: -1
+  - "L8Bdoor" -> argument: -1
+  - "L9Bdoor" -> argument: -1
+
+### Description
+
+This actor serves as the boss door for all dungeons except Lakebed Temple and Snowpeak Ruins.
+
+### Parameters
+
+| Variable | Bit mask | Bit shift | Bit length | Name | Description |
+|---|---|---|---|---|---|
+|Parameter|0x7E000000|25|6|Exit Number|Defines the scene that is being loaded upon passing through the door.|
+|Angle Z|0x00FF|0|8|Unlock Flag|Switch flag that is set to true once the boss door has been unlocked.|
+
+This actor checks for the dungeon it's in by itself.
+
+## Snowpeak Ruins Boss Door
+
+### Names
+
+- Proc Name: PROC_L5BOSS_DOOR
+- File Name: d_a_door_bossL5.cpp
+- Object Names:
+  - "L5Bdoor" -> argument: -1
+
+### Description
+
+This actor serves as the boss door in Snowpeak Ruins. The parameters are the same as with the default boss door.
+
+### Parameters
+
+| Variable | Bit mask | Bit shift | Bit length | Name | Description |
+|---|---|---|---|---|---|
+|Parameter|0x7E000000|25|6|Exit Number|Defines the scene that is being loaded upon passing through the door.|
+|Angle Z|0x00FF|0|8|Unlock Flag|Switch flag that is set to true once the boss door has been unlocked.|
+
+
+## K/V Shutter and Lakebed Temple Boss Door
+
+### Names
+
+- Proc Name: PROC_Obj_Kshutter,
+- File Name: d_a_obj_kshutter.cpp
+- Object Names:
+  - "kshtr00" -> argument: -1
+  - "vshuter" -> argument: -1
+  - "L3Bdoor" -> argument: -1
+
+### Description
+
+This shutter is used as a door between two sections of one and the same room. Examples of this are the wooden shutters that some of the monkeys in Forest Temple are locked behind or the shutter doors in the East Wing Water Supply room or the Pre-Deku Toad Room of Lakebed Temple. This actor is also used as the boss door in Lakebed Temple.
+
+### Parameters
+
+| Variable | Bit mask | Bit shift | Bit length | Name | Description|
+|---|---|---|---|---|---|
+|Parameter|0x80000000|31|1|Locked|Determines whether the shutter is initially locked or not.|
+|Parameter|0x00FF0000|16|8|Event Id|Probably orders an event to be played upon the shutter being opened. If set to 0xFF, this is not done, which appears to be the case for all instances of this actor.|
+|Parameter|0x0000FF00|8|8|Shutter Type|Determines the actor's behavior. If set to 1, it's a vertical shutter like in Lakebed Temple. If set to 2, it's a boss door like in Lakebed Temple. If set to 0xFF, it's a wooden shutter like in Forest Temple.|
+|Parameter|0x000000FF|0|8|Switch Flag|Switch flag that is set to true once the shutter has been unlocked.|
+
+
+### Notes
+- Due to a coding error, unlocking the Lakebed Temple boss door with the boss key will lower your key count by one, if you have at least one on you at that moment.
+
 
 ## Door Stopper 2
 
@@ -594,6 +683,8 @@ Alternatively to defining the door bars in the parameters of a door itself, this
 |---|---|---|---|---|---|
 |Parameter|0x0000FF00|8|8|Event Id|Event that is to be played if the door gets either closed or opened. If set to 0xFF, there is no event.|
 |Parameter|0x000000FF|0|8|Switch Flag|Switch flag that determines whether the door is to be barred or not.|
+
+
 
 
 # Switch Object Actors
@@ -634,8 +725,8 @@ This actor serves to observe one or multiple switch flags and, based on their st
 ### Logic Types
 
 The logic type determines how the actor behaves. The behaviors it affects are...
-- whether the actor can also set the target switch to false,
-- the requirements for the switch flag check to be true, such as...
+- whether the actor can also set the target switch to false once the flag condition is no longer fulfilled,
+- the condition for the switch flag check to be true, such as...
   - all switch flags needing to be true,
   - the switch flags having to be equal to the Switch Answer,
   - only one switch flag needing to be true,
@@ -670,9 +761,9 @@ This actor observes a switch flag and, if it's been set to true, sets it to fals
 | Variable | Bit mask | Bit shift | Bit length | Name | Description|
 |---|---|---|---|---|---|
 |Parameter|0x04000000|26|1|Play Timer Sound|Defines whether the timer plays the countdown sound. Note that no sound is played while the remaining time is greater than 20 seconds.|
-|Parameter|0x01000000|24|1|Demo Stop|If the timer sound is enabled, this stops the timer during events. More accurately, it extends the countdown by 30 ticks every 30 ticks if an event is currently active. The timer sound will still play.|
+|Parameter|0x03000000|24|2|Demo Stop|If the timer sound is enabled and this is set to any value other than 0, this stops the timer during events. More accurately, it extends the countdown by 30 ticks every 30 ticks if an event is currently active. The timer sound will still play.|
 |Parameter|0x00FF0000|16|8|Target Switch|Defines which switch flag is to be observed and unset upon the countdown reaching 0.|
-|Parameter|0x0000FF00|8|8|Deactivation Switch|Defines the switch flag which, upon being set, disables this actor. As such, the countdown is then disabled.|
+|Parameter|0x0000FF00|8|8|Deactivation Switch|Defines the switch flag which, upon being set, deletes this actor. As such, the countdown is then disabled unless the actor is respawned with the flag set to false again.|
 |Parameter|0x000000FF|0|8|Countdown Time|Defines the start time of the countdown. The resulting countdown is X * 15 frames.|
 
 
