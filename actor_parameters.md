@@ -479,6 +479,73 @@ TBD
 
 TBD
 
+
+# Traps
+
+## Blade Trap
+
+### Names
+
+- Proc Name: PROC_Obj_Lv6TogeTrap
+- File Name: d_a_obj_lv6TogeTrap.cpp
+- Object Names:
+  - "l6TogeT" -> argument: -1
+
+### Description
+
+Actor for the blade traps found in Arbiter's Grounds, Temple of Time and Hyrule Castle that either move along a spinner rail or in a circle around a fixed point.
+
+### Parameters
+
+| Variable | Bit mask | Bit shift | Bit length | Name | Description|
+|---|---|---|---|---|---|
+|Parameter|0xFF000000|24|8|Radius 2 (or Starting Point Index)|See Behavior Types below.|
+|Parameter|0x00F00000|20|4|Model Type|Determines the model of the actor. If set to 0x0 or 0xF, it's set to the Temple of Time model. If set to 0x1, it's set to the Arbiter's Grounds model. If set to 0x2, it's set to the Hyrule Castle model.|
+|Parameter|0x000F0000|16|4|Radius 1|See Behavior Types below.|
+|Parameter|0x0000F000|12|4|Behavior Type|Determines the actor's behavior. See Behavior Types below.|
+|Parameter|0x00000F00|8|4|Movement Speed|Determines the actor's movement speed according. See Movement Speeds below.|
+|Parameter|0x000000FF|0|8|Path Index|Index of the RPAT path that the actor shall follow. See Behavior Types below.|
+
+
+### Behavior Types
+
+- 0x0 and 0x1: Follows the given path.
+- 0x2: Unused behavior type where the blade trap only moves along its given path when either the player or a copy statue is detected on its path ahead. Returns to start position if not. [Video footage on YouTube](https://youtu.be/erKdHLp608Q).
+- 0x3: Spins around its spawn point. The radius is determined by the Radius 1 and Radius 2 parameters. If Radius 2 is not 0xFF, the result radius is (Radius1 + Radius2) * 100. Otherwise, it is just Radius1 * 100.
+- 0x4: Just like 0x3, except that it spins the other way around.
+- 0x5: Follows the given path and uses the Radius 2 parameter as an index to determine its starting point on said path. Upon reaching the last node of that path, the actor will delete itself. This type is used in phase 2 of the Stallord boss fight.
+
+
+
+### Movement Speeds
+
+The Movement Speed parameter is an index that points to the actor's speed based on the following array of possible speeds:
+
+  - 0x0: 10.0f,
+  - 0x1: 16.666666f,
+  - 0x2: 23.333334f,
+  - 0x3: 25.0f,
+  - 0x4: 26.666666f,
+  - 0x5: 28.333334f,
+  - 0x6: 30.0f,
+  - 0x7: 31.666666f,
+  - 0x8: 33.333332f,
+  - 0x9: 40.0f,
+  - 0xA: 46.666668f,
+  - 0xB: 53.333332f,
+  - 0xC: 60.0f,
+  - 0xD: 66.666664f,
+  - 0xE: 83.333336f,
+  - 0xF: 3.3333333f,
+
+
+### Notes
+
+- If the blade trap expects a valid path to be provided but is not given one, it will fail to be created.
+- Whether a type 0x0 to 0x02 blade trap decelerates and then accelerates upon reaching a path node depends on whether the path it follows is defined to be a closed (looping) path or not. If the path is defined to be closed, the actor retains its blade speed, though it does just abruptly stop moving for a frame or two.
+- A type 0x5 will always delete itself upon reaching the last node of a path, even if the path is defined to be a closed loop.
+
+
 # Doors and Gates
 
 ## Normal Door
@@ -792,6 +859,7 @@ This actor defines an area which, upon being entered, triggers a switch flag to 
 |Parameter|0x000000FF|0|8|Target Switch|Switch flag to be set or unset by this actor.|
 |Angle X|0x0F00|8|4|Logic Type|Defines the logic behavior of this actor. See Logic Types below.|
 |Angle X|0x00FF|0|8|Condition|Defines an additional condition that must be fulfilled for successful player detection. If set to 0, the player must be riding Epona. If set to 2, the actor will check for Epona's position instead of Link's position. If set to 3, the player must neither be riding Epona nor be in Wolf form. If set to 4, the player must be carrying his lantern.|
+
 ### Logic Types
 
 The logic type determines how the actor behaves. The behaviors it affects are...
